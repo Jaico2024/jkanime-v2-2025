@@ -10,7 +10,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const url = `https://jkanime.net/buscar/${encodeURIComponent(q)}`;
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+      }
+    });
 
     const $ = cheerio.load(data);
     const results: Array<{ title: string; slug: string; poster: string }> = [];
