@@ -13,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data } = await axios.get(url);
 
     const $ = cheerio.load(data);
-    const results = [];
+    const results: Array<{ title: string; slug: string; poster: string }> = [];
 
     $('.anime__item').each((i, el) => {
       const title = $(el).find('.anime__title a').text().trim();
@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     return res.status(200).json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en /api/search:', error);
     return res.status(500).json({ error: 'Error interno del servidor', message: error.message });
   }
