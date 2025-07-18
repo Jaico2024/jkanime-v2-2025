@@ -1,3 +1,6 @@
+// Version final con imports ES Modules y manejo de errores
+
+
 import axios from 'axios';
 import cheerio from 'cheerio';
 
