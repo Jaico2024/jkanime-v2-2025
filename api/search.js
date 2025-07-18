@@ -1,7 +1,7 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import cheerio from 'cheerio';
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
     const q = req.query.q;
     if (!q) {
@@ -30,4 +30,4 @@ module.exports = async (req, res) => {
     console.error('Error en /api/search:', error);
     return res.status(500).json({ error: 'Error interno del servidor', message: error.message });
   }
-};
+}
