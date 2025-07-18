@@ -1,12 +1,10 @@
-// Version final con imports ES Modules y manejo de errores
-
-
 import axios from 'axios';
 import cheerio from 'cheerio';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(req, res) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const q = req.query.q;
+    const q = req.query.q as string;
     if (!q) {
       return res.status(400).json({ error: 'Falta el parámetro q' });
     }
