@@ -1,45 +1,38 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import puppeteer from 'puppeteer';
+import puppeteer from "puppeteer";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const q = req.query.q as string;
-  if (!q) {
-    return res.status(400).json({ error: 'Falta el parámetro q' });
-  }
+export default async function handler(req, res) {
+  const { q } = req.query;
+
+  if (!q) return res.status(400).json({ error: "No query provided" });
 
   try {
-    // Lanzamos Puppeteer sin sandbox para Vercel
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true
     });
+
     const page = await browser.newPage();
 
-    const url = `https://jkanime.net/buscar/${encodeURIComponent(q)}`;
-    await page.goto(url, { waitUntil: 'networkidle0' });
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
 
-    // Extraemos los datos
+    await page.goto(`https://jkanime.net/buscar/${q}`, {
+      waitUntil: "domcontentloaded",
+    });
+
+    // ejemplo básico de extracción
     const results = await page.evaluate(() => {
-      const items = document.querySelectorAll('.anime__item');
-      const data = [];
-      items.forEach((el) => {
-        const titleEl = el.querySelector('.anime__title a');
-        const imgEl = el.querySelector('img');
-        if (titleEl && imgEl) {
-          const title = titleEl.textContent?.trim() || '';
-          const href = titleEl.getAttribute('href') || '';
-          const slug = href.split('/')[1];
-          const poster = imgEl.getAttribute('src') || '';
-          data.push({ title, slug, poster });
-        }
-      });
-      return data;
+      const titles = Array.from(document.querySelectorAll(".anime__title")).map((el) => el.textContent.trim());
+      return titles;
     });
 
     await browser.close();
 
-    return res.status(200).json(results);
-  } catch (error: any) {
-    console.error('Error en /api/search con Puppeteer:', error);
-    return res.status(500).json({ error: 'Error interno del servidor', message: error.message });
+    return res.status(200).json({ results });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error interno del servidor",
+      message: error.message
+    });
   }
 }
